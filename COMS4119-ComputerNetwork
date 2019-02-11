@@ -1,0 +1,133 @@
+Let 1
+* Internets
+    * End systems（edge） + links + routers（core）
+    * Interconnected ISPs
+* Protocol
+    * Request + response
+    * Formats of exchanging the messages + actions 
+    * How the message exchanging process is formatted in one process( SMTP, HTTP, TCP, UDP, POP)
+* Access networks:
+    * DSL:use telephone line (telephone network)
+    * Cable: use cable(TV), share one access network
+    * wireless
+* Hosts(function)
+    * Sending, break into packets , L(bits), R(transmission rate) L/R transmission delay
+* Switching:
+    * Packet-switching(On demand allocation)
+Store and forward: takes all before transmit, takes L/R to push out one packet
+    * Circuit switching(reserved resources)
+        * Must allocate one resource for end to end.
+            * FDM, TDM
+    * Queue and lost: 
+                    Router has a queue to hold the packets
+* Network core 
+    * Routing : determine the road
+    * Forwarding : move to the next station
+Lec2
+* ISP
+* Delays:
+    * Nodal processing
+    * Queuing delay(vary): depends on a(average packet arrival rate)
+    * Transmission delay(push out): L/R
+    * Propogation delay(time on the link): 
+* Throughput:
+    * The transfer rate between sender and receiver
+* Layering:
+    * 5 layers
+    * App: support  applications
+    * Transport: support data transfer
+    * Network: routing
+    * link: (no idea)
+    * Physical: bits
+* Security:
+    * Dos:
+Lec3
+* Application:
+    * run on.different end systems
+    * Communicate through network
+* Architecture:
+    * Client-server: server(may be data centers) wait for call(from clients)
+    * P2P: peer request and also provide service
+* Process (running programs)
+    * Communicate through messages (defined by protocols_
+    * Socket: A door send message or receive message
+    * Process address: IP: host address , port numbers(services): 
+* Transport service:
+    * Data integrity, timing, throughput, security
+* TCP, UDP (tranport protocol)
+    *  TCP: data reliable, flow control, congestion control, connection-oriented.
+        * Will send a message back to ensure it gets the packet
+    * UDP: not reliable, but with high speed
+        * Won’t send
+* Securing 
+    * SSL TCP and UDP do not have security
+* HTTP
+    * client-server
+    * 
+        * Initiate TCP connection
+        * accepts
+        * Exchange message 
+        * Closes
+    * Two different
+        * Non-persistent( one object each time)
+            * Response time: 2RTT + transmutation time
+            * Process
+                * Initiate on a IP + port (Client)
+                * Server at the port accepts the connection (Server)
+                * Send request (Client)
+                * Receive the message, forms a response message and send to the socke (S)
+                * Close TCP connection (S)
+                * Receive the object (Client)
+        * Persistent (multiple objects each time)
+
+Lec 4
+* Message Formats
+    * request
+        * Request + Header + Body
+        * Post, Get: post send message from the body, get from the URL 
+    * response
+        * Status code (for information)
+    * Cookies (for user-server state) (whiten http message)
+        * SET COOKIE (from server response) in the same time create ID in cookie database
+        * Next time ( server will know more about you clients):
+            * Request with cookie will get cookie action
+* Caches ( satisfy the request but without using the origin server which is slow)
+    * First send the request to the proxy server
+    * Get the response from proxy server, if not get , send the request to the original server and get it from there
+
+Lec5
+* E-mail
+    * User-agent: 
+    * Mail servers:
+        * Contains messages
+        * Message queue for outgoing messages
+        * SMTP: sending servers( clients), receiving servers (servers)
+    * Scenario
+        * A sends to B
+        * A’s UA sends the e-mail to the mail server, put it in the message queue
+        * Client opens TCP connection with B server
+        * Using SMTP, A sends message to B over the TCP
+        * B place it in the mailbox
+        * The user can see the e-mail from the user-agent
+    * SMTP format
+    * Mail Access protocols:
+        * POP IMAP HTTP
+* DNS
+    * DNS goals
+        * Host name to IP
+        * Host aliasing
+        * One host name to many iPs (load distribution)
+    * Process:
+        * Basic process
+            * Root -> .com.            
+            * Com -> amazon.com (TLD)
+            * Amazon.com -> IP
+        * Two different process
+            * Iterative (I don’t know ,ask him plz)
+            * Recursive( I will help you ask him and get it back to you)
+    * DNS records
+        * A : name -> IP
+        * NS: domain -> server
+        * CNAME: alias name -> real name
+        * MX: mail server
+    * DNS messages
