@@ -1,0 +1,50 @@
+HW1 
+RDB follows the same step, and much easier, basically it just runs some query.
+Some tips:
+    Every object should have the same attributes (if it has a inhiretance relation)
+Workflow:
+1. Worklist (BaseTable)
+2. Test create + build create
+    1. Create an object(test)
+    2. __str__ test print (plz print out all the attributes)
+    3. Copy.copy is used for not using reference to copy
+3. Test Load + build Load
+    1. Create test , load and print
+    2. Build load:
+        1. Two more attributes: _rows: store the data. _ 
+        2. Use _column_names for check if the user’s input is legal (for checking)
+    3. __str__: 
+        1.  If not None: print ( for the attribute could be None) ( to make the info more readable)
+        2. Print first 5 or the all the rows(<5)
+    4. _add_row(Truly ADD) :
+        1. Helping for checking duplicate keys in the row ( so every time  I add a row, I will check for the duplicate keys)
+4. Test find by template + build Find by template (bugs here because _add_row will add a row in the end of the _rows)
+    1. Matches_template: just match one row (for every time we need to match)
+    2. Build find_by_template + Test
+    3. _project_:
+        1. Please always think about the default None first
+        2.  Write the function to use, and then do the implementation
+5. Derived Data Table
+    1. Get the template for this(blue print)
+    2. __init__:  get it done
+    3. Test find_by_template, Test Derived DataTable find_by_template
+6. Find by primary key:
+    1. Use find by template
+    2. For it does not return a Derived Table, we just get the rows, and return a row
+7. insert
+    1. Check for the keys -> _get_key
+    2. Insert = add_row , check for primary key error, and add the new row
+8. delete
+    1. The same logic with find by template
+    2. Return count 
+9. Update:
+    1. The same logic with delete:
+        1. Does not match, do nothing
+        2. Matches do the matches_row 
+    2. Tricky part:
+        1. Get the new key for the updated row, first remove the old row, and find if the update will break the primary keys?
+        2. If it does not break, add it, or add old row and raise error for breaking the primary keys
+RDB
+1. Find_by_template:
+    1. Edge cases: query does not return anything
+

@@ -1,0 +1,79 @@
+System for streaming data:
+1. Scaling 
+2. Distributed Processing
+3. Fault tolerence
+4. Throughput
+5. Latency
+6. Performance: prevent complete stop-and-process
+Evolution
+1. Distributed Systems
+    1. COST
+    2. RELIABILITY
+    3. SCALABILITY
+2. Data mangement Systems
+3. Information flow processing
+4. Stream processing
+Basic
+* Domain: resources
+* Application = Job(instantiated): data flow
+* PE: process(sub job)
+* Instance: resources
+Workflow
+*     Aplication -> job created -> scheduler place PEs on instance -> PEs moved there
+* Resource management(CPU health) + Application management(PE state)
+* Scheduling:
+    * Load balancing
+    * Application performance
+* Fault tolerence
+    * Save state
+    * Managing state( relocate or restart)
+    * Replication 
+    * checkpointing
+Spark Programming
+* RDD - Resilient Datasets
+    * Can be recreated
+    * Stored in memory across the cluster
+    * Immutable ( can not be changed) lazy evaluated (when needed, do the evaluation
+    * It is the unit of processing in spark
+* Programming
+    * Transformations: Create a new RDD
+    * Actions: Compute the result and return to the driver or write to output
+* Transformation:
+    * Map: just map each element a function
+    * Collect Because the RDD is across all the nodes, it collect all the data from the nodes
+    * Flatmap: map each element and then take them into an array
+* Set operatioins
+    * Union, distinct, subtract, intersection
+    * Cartesian: do a combination of two RDDs
+* Actions
+    * Reduce, fold (basically the same)
+    * Aggregate: 
+        * func1: define each acc’s behavior in one node
+        * Func2: define behavior between nodes
+    * Take, top, takesample
+* Persist
+    * For caching, which improves the performance
+* Join, Left outer join, right outer join
+* Partitions ( you can specify the # of partitions)
+Spark Streaming
+* Has the same basic function in spark
+* Windowing
+    * Fully Computation
+    * Incremental Computation (should have a reversible function)
+* Watermark: specify the max delay to wait for new data ( actually is max(ts)) ????
+Apache Beam
+* Basically the same with Spark Streaming
+* Window
+    * Eviction, Trigger, Partitioning ( count, time, delta(specific attribute))
+    * Types: Tumbling, Sliding
+    * 
+        * count(5), count(1) -> length(5), one in one out 
+        * Time(60), count(1) -> length(60s) one in one out
+* Window with key 
+    * Deal with different window for each key, separate the window for each key (detail in photo)
+* Watermark (max(ts))
+    * Afterwartermarkpass(40) count(1) Trigger policy 1
+    * After p.time(60) Trigger policy2
+    * Latency 20 latency for waiting
+    * time(30) window length
+
