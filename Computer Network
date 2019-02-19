@@ -131,3 +131,48 @@ Lec5
         * CNAME: alias name -> real name
         * MX: mail server
     * DNS messages
+
+Lec 6
+* Client-server.  Dcs 
+* P2P.                Dp2p
+* Bitorrent
+    * The tracker randomly select a subset of peers
+    * At any time, A will ask the chunks they have. And request using tcp connections for chunks he doesn’t have.
+    * Which chunk to request first, which neighbors should he request ? Which she should respond to?
+        * Ask for the chunks that are rarest (least copies in neighbors) -> redistributed quickly
+        * Give priority to the neighbors which supply data In the highest rate.(top 4)
+        * Also randomly choose one neighbor to supply data.
+* DHT(X)
+
+Lec 7
+* Video streaming
+    * DASH
+        * SERVER
+            * Divide into chunks
+            * Each chunk encoded in different rates.
+            * URL for each chunk
+        * CLIENT
+            * Measure bandwidth
+            * Request one chunk one time: choose the max coding rate based on the bandwidth
+    * Client strategy
+        * When to request
+        * Coding rate choice
+        * Where to request: choose the highest bandwidth server
+    * CDN ( store  multiple copies of videos at different sites )
+        * Push deep ( near users)
+    * CDN example
+        * Store one copy to different nodes
+        * Client retrieve content from different nodes
+    * CDN content access:
+        1. Get the URL for the video
+        2. DNS -> IP(KING CDN)
+        3. Request KING CDN server
+    * Server selection startegy
+        * Learns the IP of bob
+        * Assign bob to the server which is closest  ( geo database)
+    * Netflix ( Using amazon cloud )
+        * Amazon cloud: contains webpage + videos in different rates
+        * Uploads videos to CDN
+        * Cloud determine the best CDN for the request
+        * Send manifest and CDN IP to client
+        * Client CDN interact using DASH
