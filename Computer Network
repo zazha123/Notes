@@ -79,7 +79,6 @@ Lec3
                 * Close TCP connection (S)
                 * Receive the object (Client)
         * Persistent (multiple objects each time)
-
 Lec 4
 * Message Formats
     * request
@@ -94,7 +93,6 @@ Lec 4
 * Caches ( satisfy the request but without using the origin server which is slow)
     * First send the request to the proxy server
     * Get the response from proxy server, if not get , send the request to the original server and get it from there
-
 Lec5
 * E-mail
     * User-agent: 
@@ -131,7 +129,6 @@ Lec5
         * CNAME: alias name -> real name
         * MX: mail server
     * DNS messages
-
 Lec 6
 * Client-server.  Dcs 
 * P2P.                Dp2p
@@ -143,7 +140,6 @@ Lec 6
         * Give priority to the neighbors which supply data In the highest rate.(top 4)
         * Also randomly choose one neighbor to supply data.
 * DHT(X)
-
 Lec 7
 * Video streaming
     * DASH
@@ -176,3 +172,32 @@ Lec 7
         * Cloud determine the best CDN for the request
         * Send manifest and CDN IP to client
         * Client CDN interact using DASH
+Lec 8
+* Overview
+    * Service: logical communication.   Process to process( in the application layer’s view, actually it is the network layer to send data between hosts)
+    * Protocols:
+        * Send: message -> segments.  Break down and add headers
+        * Receive: segments -> message.
+    * Relationship between network layer:
+        * Process to process vs. host to host. 
+        * process -> transport layer -> network -> in some manner -> network -> transport -> process
+    * UDP TCP:
+        * Network: IP best effort delivery service
+        * Service model:
+            * Transport layer multiplexing      分开
+            * Demultiplexing                          收集
+* Multiplexing and Demultiplexing
+    * How
+        * UDP start port + dest port -> check the dest port -> go to the right port
+            * Stort port is for sending back
+            * One port a lot of ports send to it
+        * TCP  4 items define a tupe = one socket (2 IP + 2 port)
+                * Give each process one socket
+* UDP:
+    * benefits
+        * No connection establishment
+        * simple
+        * Smal header size
+        * No cogestión control
+    * Check sum:
+        * Used for checking
