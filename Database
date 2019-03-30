@@ -47,4 +47,494 @@ Workflow:
 RDB
 1. Find_by_template:
     1. Edge cases: query does not return anything
+Lec 1
+Database Query
+* Basic query
+    * Where -> select(filter)
+    * Select -> project
+    * Union 
+    * intersect
+    * except
+    * Join -> foreign key combine
+* Advanced query
+    * Aggregate  select avg(gpa) from ..
+    * Group by.   Select avg(s.gpa), e.cid from enrolled as e, student as s where … group by e.cid
+        * 1. Where filter 2. Group by 3. aggregate
+    * Having  filter results based on aggregation computation
+    * String function: %, _ 
+    * Output redirection:
+        *  Create table xxx( )
+    * Output control
+        * Order by 
+        * limit
+    * Nested query
+        * Select name from student where Sid in ( select cid from enrolled)
+        * Select sid, name from student where Sid => all (select Sid from enrolled)
+    * Window function ( not familiar)
+    * cte = nested query but can be used as a recursion
+Lec 3
+Disk manager -> disk-oriented -> we move data back and forth on disk and storage
+* overview
+    * Sequential access is faster than random access
+    * It is like virtual memory!! -> not use OS, when we fetch data, we still want something running at the same time!
+    * Database system better -> it has a lot of information os doesn’t know
+        * Scheduling better
+* Two things
+    * How DBMS represents data on disk.   -> storage manager
+    * How DBMS move data back and forth
+How the DBMS represents the Database on disk?
+* Storage manager
+    * Track read and write
+    * Track the available space
+* DBMS stores a database as files on disk
+    * File -> a lot of pages (fixed size) -> make things easier when you have a fixed size page
+        * ( contain data + meta-data, log, indexes) ( Storage manager responsibility)
+        * Every page has its id ( map the page to the physical location)
+        * One page for specific type data
+            * Single page save dic + data
+* Heap
+    * definition
+        * Collection of pages
+        * Can get/delete pages
+        * Can Iterate pages
+        * Two ways to know what pages exist and which one has free space
+    * Linked list implementation:
+        * Free page pointer(you can store data) + data page pointer(no free space)
+        * Each page keeps track of the free slots
+        * We have to go along the pages to insert some data or find the specific pages
+    * Page directory
+        * Maintain a page that tracks the location of the data pages
+        * Also records the free slots of each page
+        * You know every page location, don’t need to look all the pages
+            * Some cases
+                * Flush out every directory( which has free space, which does not have free space)
+                * We can reconstruct the page if the directory page is trashed
+* Page Layout ( how to organize the data in the pages )
+    * Slotted pages
+        * Header + data
+            * Header: the # of used slots + The offset of the starting location of the last slot used.(slot array)
+            * Data: tuples
+    *  Log structured -> read is slower ( it has go back and reconstruct the data)
+        * Only store the log of how the db is modified
+        * Log compunction ( smaller to larger logs to remove unnecessary records)
+            * Level , universal 
+* Tuple layout （sequence of bytes)
+    * The job of DBMS is to interpret the bytes into attribute types and values
+    * Interpret bytes ->  attribute types + values
+    * Tuple
+        * Header (meta-data) (null? Concurrency control) + tuple data ( the struct is defined when you create a table)
+        * Pre-join -> denormalize 
+* Record IDs ( keep track of where the tuples are ) -> keep track of the individual tuple
+    * Record ID = page_id + offset/slot
+Lec4
+* Disk-oriented architecture
+    * Primary location of database is on non-volatile disk
+* Database system
+    * On disk
+    * Buffer pool -> 1. Directory 2. Page2
+    * Execution engine 
+* Overview
+    * How to represent individual values
+    * System catalogs ( meta data for how to interpret the bytes )
+    * Storage models ( take data in tables and map them in pages )
+Lec 5
+* How the DBMS move data back and forth
+    * Spatial Control -> where to write pages on disk
+    * Temporal Control -> when to read pages and when to write them on disks
+        * To minimize the stalls (back and forth) 
+* Overview
+    * Buffer Pool
+        * Frame = slots in tuples
+        * When query, we have a copy in buffer pool
+    * Buffer pool meta data -> page table
+        * Page table -> currently in memory pages
+        * When read, pin on the page, and do not allow to evict it. -> replace?
+        * Dirty flag -> some writing happens -> just remove it or write back !!
+        * When read a page that is not there, (a latch) , then find the page and copy it.
+    * Locks and latches
+        * Latches -> protect data structures (  implemented level  ) 
+        * Locks -> protect database entities ( high level ) 
+    * Page table vs page directory
+        * Dir : Page ids -> page locations -> store on disk
+        * Table : page ids -> buffer pool locations -> in memory store
+        * Multiple buffer pools -> hashing to different buffer pools
+    * optimization
+        * Pre-fetching
+            * When retrieving, it will also retrieving others ( based on the query plan, we know what we are doing )
+        * Scan sharing
+            * Rather start from scratch, scan with the one who is doing the job you are doing.
+* Buffer Pool replacement policies
+    * Goals
+        * Correctness ( do not make update page throughed away )
+        * Accuracy( do not throw away pages that are in need )
+        * Speed ( it will hold a latch when we retrieve page ) 
+        * Meta-data overhead
+    * Policies
+        * LRU 
+            * Maintain a timestamp when accessed
+            * Select the one with oldest timestamp when evicted.
+        * Clock
+        * To be done
+Lec 6 Index  -> access methods
+* Overview
+    * Data structures
+        * Internal meta-data
+        * Core data storage -> store the tuple as value
+        * Temporary -> create a hash table and then through away
+        * Index -> store pointer as value
+    * Design decisions
+        * Data organization -> how we lay out our data for efficient access
+        * Concurrency -> how to enable threads to access the data structure at the same Time without problem.
+    * Map key to value
+        * Key -> Hash function ->lands in a key  in an offset in the array(O(1)) -> point to the value
+* Static hash table -> assumption perfect hash function + unique key
+    * Allocate each key to an array location
+    * No collision -> you can not know the key number
+* Hash function (how to map key to a smaller domain ) + hash scheme ( handle collision )
+* Properties of different hash ( fast + low collision rate )
+    * Hash functions
+    * Hashing schemes
+        * Linear probe -> must have key|value in each location ( it may have some key in same location, we have to determine whether it is the same key ) 
+            * Some cases
+                * Delete 
+                * Handle not unique key
+                    * Store separate storage area for each key
+                    * Store keys entries together 
+            * In collision -> hash table becomes O(n) for maintaining the hash table
+        * Robin-Hood 
+            * If come across the key, if it is nearer, then we take its place. 
+            * It holds key|value|position_diff
+        * Cuckoo hashing 
+* Don’t know the key numbers in advance 
+* Dynamic hash table
+    * Chained hashing
+    * Extenible hashing
+    * Linear hashing 
+Lec 8
+Index 
+    * Overview
+        * Table indexes -> replica of subset of table’s columns that are organized for efficient access using the subset 
+            * Must keep the content of table and content of index synced ( logically )
+        * It is database system’job to figure out best index for use to execute query -> statistics 
+    * B+ tree ( real keys and values are stored in the leaf nodes )
+        * M-way search tree  +  balanced  
+        * Sibling pointer! 
+        * <value> / <key> : key -> columns  value: inner node -> pointer to nodes, leaf node : record id ( page id + slot offset )  / record content ( no heap )
+        * Array is sorted in key ( can do binary search ) 
+    * B+ tree operations 
+        * Unique index
+            * Insert
+            * Delete 
+        * Non-unique index
+            * Duplicate keys
+                * 
+            * Value list
+                * 
+        * Variable length key
+            * Store the pointer for a tuple’s attribute (no)
+            * Variable length nodes
+        * Prefix compression
+            * Prefix compression
+                * Only store the minimum prefix for route
+        * B+ tree is actually doing
+            * A linked list with lot of nodes to help it to jump over -> another implementation skip lists
+            * 
+    Lec 9
+*     How the DB build these keys
+    * Automatically create an index for enforcing the integrity constraints
+    * Forign key constraint
+        * Use index to find a match ( my sql must have a unique index or it will not has a foreign key constraint )
+Lec 10 
+* Query plan = trees
+    * SQL -> Operator ->
+        * 
+* Process Models -> How to execute a query plan
+    * Iterator model ->
+        * Implements next -> give you a tuple (null for no)
+        * Top down -> parent need tuple -> child need tuple -> leaf give you the tuple
+    * Materialization model -> transactional 
+        * Implement using a output buffer 
+        * Bottom up -> bottom buffer -> upper level buffer 
+    * Vectorization models
+* Access Methods -> How DBMS access the data stored in the table
+    * Sequential scan 
+        * Maintains a cursor -> the last tuple I have seen
+        * 
+        * Optimization 
+            * Zone map
+            * Late materialization
+            * Heap clustering
+    * Index scan -> knows what page we are going to read 
+        * Pick the most selective index -> if there is an index, do the index filter first
+    * Multi-index scan 
+        * Do two filter, then combine them together using intersection ( and ) or union ( or )
+        * Optimization 
+            * Index scan page sorting -> don’t fetch, sort the page id then ,fetch 
+            * The relational model -> the order does not matter  !!!!
+* Expression Evaluation
+    * Where clause is a expression tree
+    * Maintain a execution context  ->  for each tuple figure out it is true or not 
+    * 
+Lec 12 
+* Overview
+    * Why we need join -> normalize table 
+        *  no redundant, we split the table to different table -> so they have no repeat 
+        * Join, put the split tables together -> reconstruct the tables
+        * 
+    * Joining two tables
+* Joining output
+    * Copy 
+    * Record ids -> late materialization 
+* Join algorithm
+    * Nested loop
+        * It sucks because we have to do a sequential scan to get a match
+        * Naive 
+            * 
+            * Calculate the IOs for the cost 
+            * Use the smaller in the outer loop
+            * Don’t need to get each tuple using one page
+        * Block nested
+    * Index 
+        * Use an index to find. A inner table match.
+        * 
+        * Basic idea 
+            *  put smaller table as outer table
+            *  buffer as much outer table
+            * Loop over inner table or use an index
+    * Sort-merge join
+        * process
+            * Sort join keys
+            * Walk two cursor and find match
+        * High level idea
+            * Because the previous tuples need not to be relooked 
+    * Hash join
+        * Hash will get the same value for same key
+        * process
+            * Build hash function on join (outer)
+            * Use the hash function -> get to the outer tuple
+            * 
+    * Grace Hash join 
 
+Lec 13
+* Overview
+    * SQL -> what you want 
+    * Query plan -> how we actually do this.
+        * Query optimizer = compiler -> choose the best algorithm based on what it knows about the data 
+* Rule
+    * Rewrite the query 
+* Cost-based Search
+    * Use a cost model and pick the lowest cost one
+* An overview
+    * Binder will lookup the system catalog and get the internal metadata of the DB
+        * Name -> Internal ID
+    * Apply rules to rewrite 
+* Relational Algebra equivalences
+    * Rule engine check the rule
+    * example
+        * WHERE
+            * Predication pushdown -> do the filter first
+            * Reordering the predicates
+            * Simplify the predicates
+        * PROJECTIONS
+            * Push projections down 
+                * Copy less data from one operator to the next 
+        * Example
+            * Impossible predicates or unnecessary ( 1=0 , 0=0 ) 
+            * Join elimination -> join just happens in unique key or primary key, other cases do not make sense!
+            * Ignoring projections 
+            * Merging predicates
+            * Joins -> reordering!! -> must prune the search space
+* Plan cost estimation -> how much disc reading 
+    * How many tuples will be read/write -> based on the statistics  ( database catalog )
+    * Statistics 
+        * Number of relation.          N(R)
+        * Number of distinct values V(A,R)
+        * Selection cardinality          SC(A,R) = N / V -> assume data uniformity
+        * Selectivity    SC/V ( a= xxx 有多少tuples /  不限制下有多少tuples ）（ range query works the same ) -> probability
+        * assume predicates are independent 
+    * Use the selectivity to handle
+    * Sampling 
+* Plan enumeration -> build query plan
+* Nested sub-queries
+Donald DB
+* Resource Model
+    * Collection = Table
+    * Resource = Row
+    * Sub_R = weak entity
+    * Sub_Collection = ?
+* Weak entity: 
+    * Order contains Order details 
+    * When one order is deleted, all the order details is deleted.
+* Application Layer:
+    * RDB DataTable
+
+
+Lec 1
+Nothing 
+Lec 2 
+Lec 6
+* Triggers
+    * Update, delete, insert
+* Inheritance 
+* 1-2-3 table
+Lec 7
+* hw3
+    * Engines
+        * Schema 
+        * Query
+        * Durability
+        * Control Access -> use isolation ( wait illusion that they are using the database)
+    * Architecture
+        * Query compiler -> SQL -> program -> execute engine -> run
+        * (Find) Index: finding and locating the row
+        * (Access) Buffer -> memory to hold rows 
+        * (Load/save) Storage 
+        * transaction manager : AICD  make sure makes AICD behavior (isolation)
+    * Disck
+        * Delay
+            * Move the head to the track
+            * Wait the Sector
+            * transfer
+        * Sector + track -> 
+            * Elevator algorithm -> seek time
+        * RAID
+            * Several disks into one disk
+            * RAID0 -> fast, like one disk RAID1 -> in case of failure
+            * RAID 1+0
+            * RAID5 -> correction block (parity block) -> but write slower ( need to write two)
+    * Record block
+    * Index
+        * Overview 
+            * Key = put index on it: if the key is (foo), go to row (bar)
+            * Hash 
+            * b+ tree (ordering is important)
+        * Some terms
+            * Cluster , uncluster -> same order or not
+            * Dense -> one index for one entry, Sparse -> one index for one block
+    * 
+HW3
+* Find_by_template -> return csvdatatable
+    * Use index 
+* Add_index:
+    * Unique one row one index 
+    * Index -> may have lot. 
+* Import(rows) 
+* Save() -> csv file 
+* Load() -> load -> disk -> memory  index
+
+Mid-term
+* 先明白他要做的事情
+* 根据代码和他的话把他要做的事情对着代码说出来，知道每行要干什么
+* 确定先后顺序，写之前有一个expectation，写完之后对照。
+* 能跟着写的就跟着写...
+* 2.
+    * Get the join table a+b ( joined by playerid, teamed).   
+    * According to the jointable get playerid, teamid 
+        * namelest, namefirst(sub query)
+        * Game_player_p, m
+        * First year, last year ( a condition)
+        * Total_g (add together)
+* 3.
+    * FROM ( one row = one person)
+        *  people from appearances (through peopled) 因为 peopled 对应一个people 
+        * And life span is not null （subquery) -> subquery = a table
+    * SELECT
+        * People info
+        * DOD, DOB (concat -> life_span)
+        * Life_span
+* 4.
+    * Sub query in select
+    * Use subquery + in to get the people in Hof but not a player or manager.
+* Join:
+    * = data1(A,B,C) (ON) (people) add batting info
+        * Table1 info: … 1 (lastname)
+        * Table2 info: …. n ( batting info)
+    * Data add (park name) (on) (park name)
+        * Table1 info: … parkname
+        * Table2 info: … parkrealname
+
+
+
+书
+Relational Model
+* Relational model
+    * Table -> relation = set of tuples(rows)
+        * Set of rows -> relation instance 
+    * Row -> tuple
+    * column -> attribute
+* Schema
+    * The value and the attribute of each relation
+* Keys
+    * A way to distinguish tuples in a given relation
+    * Superkey, candidate key(min super key) , primary key（chosen candidate key)
+    * The values of keys can uniquely define a single tuple.
+    * Foreign key
+        * One relation has primary keys of other relations (r1 -> r2)
+            * R1 foreign keys (referencing) r2 (referenced)
+* Operations
+    * Selection:
+        * Return rows that satisfy predicate
+    * Projection
+        * Output specified attributes
+    * Natural join
+        * Pairs of rows(same attributes-> same values)
+    * Cartesian product
+        * All pairs of rows
+    * Union 
+        * Combine two relations
+* SQL
+    * DDL
+        * Create table , primary key, foreign key
+    * SQL query
+        * Select 
+            * Select distinct 
+            * + - select salary * 1.1
+        * Where ( predicate )
+            * select name from instructor
+            * from instructor
+            * Where name = ’Comp. Sci.’ and salary > 70000;
+        * Multiple Relations Query
+            * Select -> attributes desired in result of query 3
+            * From -> relations to be accessed 1
+            * Where -> predicate 2
+        * Natural join
+            * Only consider the tuples with same names in attributes and concat together
+            * * join on 什么表明他们是对什么信息的合成.
+                *     * Dept_name + id 对于同一学院 同一课程 ( define the set )  (dept_course set) -> other attributes are the data you want 
+                *     * id 对于课程 (course set)
+            * * Rename
+                *     * Attribute-name, relation-name
+                *     * Join with itself
+            * * String function
+                *     * Intro%
+                *     * %comp%
+                *     * ___
+                *     * ___%
+            * * Order 
+                *     * Multiple attributes
+                *         * Order by salary desc, name asc
+            * * Where 
+                *     * Where -> 
+                * * Set operations
+                * * Null values
+            * * Aggregate function
+                *     * The not group by attribute must be aggregate function
+            * * The meaning of aggregation function
+                *     * 1. From to get a relation
+                *     * 2. Where Predicate is applied
+                *     * 3. Group by to get tuples into groups, if no group by, then all is one
+                *     * 4. Applied to each group
+                *     * 5. Generate results based on the tuples.
+            * * Sub Query
+                *     * A select-from-where expression
+                *     * Where example
+                *         * Set membership
+                *         * Set comparison
+                *         * Correlated subquery
+            *     * Where example
+                *         *  Because all select from where all return relations
+            *     * Scalar subquery
+                *         * Only return a relationship with one single attribute
+                *         * 相当于把一个加上去
+    * 
+            * 

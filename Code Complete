@@ -1,1 +1,160 @@
-2018.2.2
+* Design
+    * 1.
+        * Managing Complexity
+            * Simple, correct implementation to a question
+        * Characteristics
+            * Minimal complexity: easy to understand
+            * Ease of maintenance: self-explanatory
+            * Minimal connectedness: less connections
+            * Extensibility: extend without affecting other pieces
+            * Reuse: you can use a piece.
+            * Stratification: keep levels 
+        * Form consistent abstractions:
+            * This thing does something and it only does it.
+        * Secrets ( hide it )
+            * MAX_TIME (changeable global data)
+            * Id = newid() ( hiding the changeable part)
+            * Hiding complexity (so you will never handle it after)
+    * 2.
+        * coupling
+            * Size 1 > 6
+            * Don’t make sneaky coupling, just pass through a list
+            * Lookupvb() make other module easily call you 
+        * Formalize class contracts
+            * You give me a, b, c I give you d, e, f
+        * Draw diagram, keep your design modular
+* Class
+    * Class foundations
+        * ADTs
+            * benefits
+                * Hide implementation
+                * Change does not affect the program
+                * Easier to improve
+            * example
+                * coolingSystem.GetTemperature()
+                * coolingSystem.SetCirculationRate( rate )
+                * coolingSystem.OpenValve( valveNumber )
+                * coolingSystem.CloseValve( valveNumber )
+            * Treat object as ADTs, not basic data types
+    * Good class interfaces
+        * Ability to view a complex operation in a simple way
+        * Each class should implement only one ADT
+        * Implementation detail should always be hidden
+        * Keep the interfaces minimally on the semantics
+        * Don’t add public members that are inconsistent with the interfaces
+    * Good Encapsulation
+        * GetX() , setX()
+* Routines
+    * Routine is an individual method or procedure invocable for single purpose.
+    * Routine improvement
+        * Routine name 
+        * Routine document
+        * Good layout to show the logical organization
+        * If the input is modified, it can not be called input
+        * Routine should be highly related (one purpose)
+        * Magic numbers
+        * Does’t handle bad data
+        * Too many parameters
+        * Poorly ordered parameters
+    * routine reasons
+        * Putting a section of code into a well-named routine is one of the best ways to document its purpose
+    * Good routine
+        * Just do one thing plz
+        * The name should abstract the all lines.
+        * Pull two duplicate code into one place 
+        * Hide sequence
+        * Improve readability all the time
+    * Cohesion of routines
+        * How closely the operations are related. -> cosine()
+            * Functional cohesion -> erase file()
+            * No sequential cohesion is better. 
+                * Create three routines to compute the birth date, retirement
+            * Communicational routine:
+                * To be read
+    * Good Names
+        * Name the function by what it returns
+        * Name a procedure by strong vet.
+        * Do not get the object in oop
+    * parameters
+        * Put parameters in input-modify-output order
+        * Always the same order
+    * Function and procedure
+        * Function returns a value
+        * Procedure does not return 
+    * Setting the return value
+* Defensive programming
+    * overview
+        * You won’t be hurt by other drivers
+        * Garbage in, nothing out or error message out.
+    * Check the values so that they fall in a range.
+    * Ways for improving
+        * Using iterative design
+        * Writing pseudocode before writing
+        * Writing test cases before writing the code
+    * How
+        * Assertion (for the process never happens in the code)
+            * range
+            * Open?
+            * Pointer 
+            * At least n numbers
+        * Error handling(something might happen in the code)
+        * Robustness vs correctness
+            * Never return inaccurate result
+            * Keep the software operating
+        * Exceptions are for the events that should never occur.
+* PseudoCode
+    * Knows what it does -> test cases -> write pseudocode + data -> review ->  code -> test -> done
+    * Design -> create -> review 
+    * Design -> check the design -> code -> review the code
+
+*  How the pseudocode be written?
+    * Written in entirely english
+    * At level of intent.(code’s intent)
+* Benefits
+    * Review easier
+    * Design -> pseudocode -> code
+        * Keep high level error in hight level
+    * Pseudocode becomes commenting
+* Use PPP
+    * design
+        * Check the job of the routine is defined.
+        * High level detail
+            * Information hides
+            * inputs
+            * outputs
+            * Preconditions 
+        * Name the routine
+            * If there’s a trouble of naming, then the purpose should be unclear.
+* Research functionality available in the standard libraries.
+* Pseudocode
+    * “it expresses in precise English what the routine needs to do.”
+    * If you feel uncomfortable with the pseudocode, then you should write it again.
+    HOW:
+TDD + PPP
+    
+1.Know what you want to do -> it must have a good name!
+2.Build test cases base on what it should be done
+3.Build a pseudocode + data type based on what it does
+4.Build code based on pseudocode and data type
+5.run each line of code mentally, know what it does and why it is there.(it meets your expectation all the time)(each line of code should be easily understand)
+6.compile (do not compile until you convince yourself you are right)
+7.try test cases
+8.debugger, run each line
+9.pass all the test cases
+10.if it is buggy, don’t hack around, rewrite! Create a new design
+11. Clean up leftovers
+* Write code
+    * Walk through all your code mentally -> nothing is right just because it seems work.   -> understand the role of each line of code and why it is needed.
+    * If you don’t know why it works, then study it, until you know!
+    * Don’t compile until you do the steps! 
+        * When you compile, you will easily do “one more compile” thinking.
+        * Do not compile until you convince yourself you are all done.
+    * Once you compile, step through the debugger, make sure each line executes as you expect it to.
+* Clean up
+    * Routine’s interface
+    * General design quality
+    * Variables 
+    * logic
+    * layout
+    * Documentation 
+    * Remove redundant comments
