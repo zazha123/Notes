@@ -1,52 +1,11 @@
-HW1 
-RDB follows the same step, and much easier, basically it just runs some query.
-Some tips:
-    Every object should have the same attributes (if it has a inhiretance relation)
-Workflow:
-1. Worklist (BaseTable)
-2. Test create + build create
-    1. Create an object(test)
-    2. __str__ test print (plz print out all the attributes)
-    3. Copy.copy is used for not using reference to copy
-3. Test Load + build Load
-    1. Create test , load and print
-    2. Build load:
-        1. Two more attributes: _rows: store the data. _ 
-        2. Use _column_names for check if the user’s input is legal (for checking)
-    3. __str__: 
-        1.  If not None: print ( for the attribute could be None) ( to make the info more readable)
-        2. Print first 5 or the all the rows(<5)
-    4. _add_row(Truly ADD) :
-        1. Helping for checking duplicate keys in the row ( so every time  I add a row, I will check for the duplicate keys)
-4. Test find by template + build Find by template (bugs here because _add_row will add a row in the end of the _rows)
-    1. Matches_template: just match one row (for every time we need to match)
-    2. Build find_by_template + Test
-    3. _project_:
-        1. Please always think about the default None first
-        2.  Write the function to use, and then do the implementation
-5. Derived Data Table
-    1. Get the template for this(blue print)
-    2. __init__:  get it done
-    3. Test find_by_template, Test Derived DataTable find_by_template
-6. Find by primary key:
-    1. Use find by template
-    2. For it does not return a Derived Table, we just get the rows, and return a row
-7. insert
-    1. Check for the keys -> _get_key
-    2. Insert = add_row , check for primary key error, and add the new row
-8. delete
-    1. The same logic with find by template
-    2. Return count 
-9. Update:
-    1. The same logic with delete:
-        1. Does not match, do nothing
-        2. Matches do the matches_row 
-    2. Tricky part:
-        1. Get the new key for the updated row, first remove the old row, and find if the update will break the primary keys?
-        2. If it does not break, add it, or add old row and raise error for breaking the primary keys
-RDB
-1. Find_by_template:
-    1. Edge cases: query does not return anything
+FINISH
+* 1 2 
+* 3 4 5
+* 6 7 8 9
+* 10 11 12 13 14 15
+* 16 17 18 19 
+* 20 21
+* 22 23 24
 Lec 1
 Database Query
 * Basic query
@@ -244,7 +203,37 @@ Index
     * Automatically create an index for enforcing the integrity constraints
     * Forign key constraint
         * Use index to find a match ( my sql must have a unique index or it will not has a foreign key constraint )
-Lec 10 
+Lec 10
+* Concurrency control
+    * Ensure the concurrent operations on a shared object
+* Locks and latches
+    * Locks -> protect the logical contents of the db
+        * Hold the whole duration of the transaction 
+        * Roll back 
+    * Latches -> protect the internal data structures
+        * Hold for operation duration
+* Latch modes
+    * Read mode
+        * Multiple threads allowed
+    * Write mode 
+        * Only one thread
+        * Can not acquire if another thread is in any mode
+* problems
+    * Modify same Time -> write latch , done , realease
+    * Traversing -> latch crabbing/ coupling
+        * Multiple threads to access b+ trees at the same time
+            * Get latch for parent
+            * Get latch for child 
+            * Release latch for parent if “safe"
+        * Read 
+        * Insert 
+        * Delete 
+* Better solution 
+    * Latch first 
+        * Assume that you will not do a split or merge
+            * If you are wrong -> go back and restart 
+            * Not wrong -> happy
+Lec 11 
 * Query plan = trees
     * SQL -> Operator ->
         * 
@@ -356,6 +345,428 @@ Lec 13
     * Sampling 
 * Plan enumeration -> build query plan
 * Nested sub-queries
+
+Lec 14
+* Parallel execution
+* Parallel vs distributed
+    * Parrallel 
+        * Nodes close to each other
+        * Communication is small
+    * distributed
+        * Nodes far
+        * Use public network
+* parallelism
+    * Inter-query -> hard for updating
+        * Different query same time
+    * Intra-query -> two approaches
+        * Single query in parallel
+            * Horizontal -> different instances to run different subsets of data
+            * Intra 
+                * Use exchange operator to combine the result 
+                * Break up to different threads to execute it
+            * 
+        * Inter 
+            * Piplined
+            * 
+            * Two task must in the same pace
+    * Access data must be parallized
+        * Multi-disc parallelism
+            * Configure OS to store files across multiple storage devices
+                * Storage appliance 
+                * RAID
+        * Database Partitioning 
+                * Split single table into disjoint physical segments 
+                    *  column store
+                    * Sharding -> based on partitioning key -> go to different partition
+* Process model
+    * Worker -> responsible for executing tasks
+        * Process per worker -> one query one worker
+            * Dispatch -> worker 
+            * Single process for one worker -> OS scheduler 
+            * No threads library 
+        * Process pool -> one query multiple worker  
+            * Hand things to worker that is free
+        * Thread per worker
+            * Single process with multiple threads
+            * Better 
+                * Less overhead per context switch
+* Scheduling 
+Lec 15
+* Embedded logic
+    * Conversational database API
+        * 
+        * Only one connection one time -> block between two SQL
+    * Embedded logic
+        * Move application logic to SQL 
+        * Efficiency , reuse
+    * Some logic inside DBMS
+        * UDF
+            * SQL + programming language 
+            * Read only
+        * Stored procedures
+            * Input, output 
+            * Modify tables
+        * Triggers
+            * Some event -> UDFs
+        * Change notification
+            * Pub/sub notification
+    * Not built-in types
+        * Attribute splitting 
+        * Application serialization -> JSON 
+            * Have to deserialize it in application code
+    * User defined type
+        * Expose a user defined API to extend the database system
+    * views
+        * Virtual table
+            * To application, it is a table -> used to hide attributes
+            * Internally, your query will be rewrite to do actually what they do. 
+                * Always rewrite query 
+            * Materialized only when needed -> so it is dynamic 
+        * SELECT INTO -> create a new real table, which is static
+    * Materialized view
+Lec 16 -> concurrency control
+* Motivation 
+    * Both change the same record in table -> concurrency 
+    * Transfer 100, power failure -> durability
+* Transaction 
+    * ACID guarantee 
+    * A sequence of operations on a shared database to perform high-level function (application level)
+    * It is the basic unit of change in DBMS
+* Example 
+    * 
+    * It is actually run with other transaction in the same time, but it should not see the effects of other transactions.
+    * After you type commit, if all the actions are done, you do the I/O and send ack.
+                    * If not done, then wait, when it truly done, it will do the I/O, then send ack.?
+    * DML is with implicit commit -> update … = begin update …. Commit 
+* Strawman system -> sqlite
+    * A pointer, a queue
+    * Copy 
+    * If the transaction is complete -> pointer move to the new file
+* Allow concurrent execution of independent transactions
+    * Throughput
+    * Repsonse time
+    * Interleaving but still correct
+    * Balance approach
+* Problem -> we must define what interleaving transactions are correct
+    * Temporary inconsistence ( unavoidable )
+    * Permanent inconsistence ( bad )
+* Transactions scope 
+    * Only care about the data, read/write
+    *  
+        * Commit -> all change saved, can not roll back
+            * When you say commit, it is not truly commit, when the DBMS told you that your change committed, the transaction is committed.
+        * Abort -> undo all the change this transaction do -> can be activated by the DBMS ( maybe because of integrity constraint ) ( like there is nothing happens ) 
+* Correctness criteria: ACID
+    * Atom: happen or not happen
+    * Consistency: for distributed, 
+    * Isolation: an illusion that it only execute itself  -> the transaction begin in the 13s, then it run as if it runs alone in 13s ( even though there will be interleaving )
+        * Use concurrency protocol to ensure isolation
+    * Durability : after commit, machine crash, it is still there.
+    * 
+* A
+    * outcomes
+        * Commit it 
+        * Abort 
+    * Grantees atomic
+        * All execute or no actions at all
+    * How to do it 
+        * Logging
+            * Log all the actions, if there is something wrong, go back!
+        * Shadow paging
+            * Copy the pages that transactions is made on.
+* C
+    * The world is represented by the database -> modeling the world  -> high level
+        * Database consistency -> models the world correct, follows integrity constraints. -> single node changes, other node also changes
+        * Transaction consistency -> based on the application code you write
+* I -> when one txn stalls because of resources, another txn continues.
+    * As if it is the only user
+        * How to achieve this
+            * Two protocals
+                * Pessimistic: don’t let problem arise in the first place -> like crabing 
+                    * Ask for permission before do something
+                * Optimistic: assume conflicts are rare, do, but if bad happens , undo -> 
+            * Example
+                * 2000 -> 2120 consistency still model the real world
+            * When one is stalled, other one can continue doing what they can do if there is no conflict. 
+            *  
+            *  DBMS only sees read and write
+        * It is correct if it is the same with a serial execution schedule. -> dbms only sees R,W
+            * Serial schedule -> no interleaving
+            * Any state in the DBMS is the same with the schedule -> it is same
+        * Properties of schedules
+            * It will not ensure that when you issue an transaction, it will run in order.
+        * It is serializable if it is same with the serial schedule.
+            * 
+        * Serilizeable schedule -> 
+        * Txn issues first does not mean that it must execute first -> the flexibility allows db to choose interleave the transaction 
+        * Also when you commit , it is not truly commit. When it commits, it will send ack to tell you that it commits.
+    * Conflicting operations -> start to know what exactly is the equivalence.
+        * Different txns
+        * Same object, and one is write
+        * 
+    * basic rule 你不能让别人写你需要读写的东西，你写了的话别人也不能读你写的东西。
+        * 所有东西应该在你commit之后才可以进行.
+    * R,W -> 
+        * Unrepeatable read -> read twice, read the internal in other transactions.
+        * 如果读了，别人不能写，因为这样下次读的时候你会读到别人写的东西。
+        * 
+    * W,R -> expose the inconsistent state of the DBMS to outside of the world.
+    * 如果写了，别人不能读，因为你读到的是中间状态，还没commit（随时可能roll back)
+        * Write into the buffer pool does not mean that we get the durability of the data. The buffer pool data may be inconsistent state.
+        * it will cause cascading abort
+            * One is aborted, and another must abort too.
+        * 
+        * T2 read dirty data from A ( not committed data )
+    * R,R -> change the uncommitted data
+    * 如果写了，别人不能再写，因为这样你自己写的数据就没了..
+        * 
+        * 19, Bieber 
+    * Cascading aborts
+    * Determine if it is serializable 
+        * Conflict equivalent -> every conflicting actions are ordered in the same way -> if it is equal to 
+        * When you have the time for each transaction
+        * What is conflict serilizable
+            * Move actions up and down.-> there is one that is equal to the serial transaction 
+            * If it is not conflict, we can reorder it 
+            * Will wait until the lock is released.
+    * Dependency graph
+        * If tj wants to use ti’s resource, then you have an edge ti -> tj
+        * No cycle 
+        * Inconsistent analysis 
+    * View serializable 
+        * Rewrite some application code so that it will be correct even if it is not conflict serializabl
+        *  -> application correctness, but not seen by database
+            * We only care about that we read A, and get A finally updated by T3
+        * No one can do this 
+    * Schedules 
+        * 
+* D
+    * Make sure that all the transactions that are committed, it is really committed -> you told them that it is committed, it is truly committed.
+    * Buffer pool is not persistent, so we have to log everything before real commit.
+* Should be done by smarter people to do this and get an abstraction of it.
+
+
+Lec 17 
+* Last class
+    * Give you a schedule -> it is serilaizble or not
+* What we need to do
+    * Guarantee that all execution schedules are correct without knowing the entire schedule ahead of time.
+        * Solution, to use locks to protect. -> pessimistic protocol 
+    * Lock manager -> traffic cop
+* Lock types
+    * Basic
+        * S-lock
+        * X-lock
+        * 
+        * if I crash,  memory got wiped, no transactions -> no need to maintain the lock table anymore.
+    * Problem of S-lock and X-lock
+* Two-phase lock -> do the transaction managing on the fly -> generate schedule that is serializable
+    * Two phases -> must follow 
+        * Growing 
+            * Request locks
+            * Lock manager grants or denies
+        * Shrinking 
+            * Only release locks
+    * Cascading aborts -> dirty read
+        * Strict 2PL
+            * Strict means that a value written by a txn is not read or overwritten by other txns until that txn is finished. -> the serialized order 
+            * Just before the commit, it release all the locks
+                * No Cascading abort 
+* Two-phase locking
+* Deadlock detection + prevention 
+    * 
+        * Deadlock detection 
+            * Wait for graph
+            * 1s get the graph and decide how to break it  -> a parameter to set up
+            * Some decision
+                * Select a victim to rollback to break the cycle
+                    * Choose victim
+                        * By age
+                        * Different 
+                *  Rollback length
+                    * completely
+                        *  
+                    * Minimally
+                        * 
+            * 
+        * Deadlock prevention
+            * Wait-die 
+                * Old one will be waiting the young txn 
+                * High -> wait
+                * Low -> abort
+            * Wound-wait
+                * High -> kill the txn
+                * Low -> wait
+                * 
+        * Only one can be used
+        * It will maintain the original timestamp
+* Hierarchical locking -> it minimizes the work when you want to acquire or release the locks                   
+    * Acquire lock -> decision on what it is on 
+    * When you hold a lock on database, you hold locks on everything below
+    * Intention lock
+        * Hints for upper part -> you can get the locks or not -> do not need to check below. -> you may not get the 
+* Phantom problem
+    * Can lock on the tuple that does not exist 
+    * Predicate locking -> no 
+        * If it satisfies the predicate, then it will not be permitted 
+    * Index locking
+        * Find the index and take a lock on the node， find all the entries, take a lock on the index.
+    * Locking without an index -> no
+        * Lock on each page
+        * Lock on the table ( no delete or insert ) 
+    * Repeating scans
+        * Re-execute every scan when commits , if there is difference, then roll back.
+* 
+* Isolation levels
+    *  Controls the extent that a txn is exposed to actions of other concurrent tens.
+    * 
+    * 
+        * Depends on the isolation and the txns
+    * 
+* Access mode 
+    * Default -> read write
+    * You can change it to read only -> no need to lock
+Lec 19
+* Overview
+    * Multi-version concurrent control - MVCC
+        * DBMS maintains multiple physical versions of a single logical object in the database.
+    * They will read a snapshot and will not get the internal state.
+    * Time-travel queries -> fanaicial 
+* How it works
+    * Version -> was this visible to a txn 
+        * Read -> is this tuple visible to me ? Read 
+        * Write -> create new version and set end time.
+        * Aborts? Undo the all timestamps -> txn status table. 
+            * Active -> not committed yet. Does not exist before.
+        * Commit -> the txn table is done.
+    * You will get different tuples inside the database -> with different time version
+    * Don’t know wtf is this!
+        * Don’t know the concurrency control protocol throughly.
+
+Lec 22 -> distributed system
+* Overview
+    * What does it include
+        * Nodes are far
+        * Nodes are connected by public network
+    *  Still has to cover the part we include in the parallel DBMS
+        * We can not assume that our machines are reliable.
+        * 
+        * OLTP -> amazon, update a little piece of data.
+        * OLAP -> read only, see the all data
+* System architectures
+    * How to coordinate with each other.
+        * 4 different   
+            * Single node -> I only know how to get data from my own disk.
+            * Memory is not local -> can be got by lots of CPU
+            * Cpu has its own memory (different )->  disk is shared by a lot of memory and CPU. Everything in memory is just local to itself.
+            * Share nothing -> it just use the network to communicate with each other. ( here I change something )
+    * Shared memory 
+        * Each processor has a global view of all in-memory data structures
+        * OS level
+        * Must know others exist ( communicating by message)
+    * Shared disk
+        * Cpu has its own memory 
+        * Different process to same disk
+        * Anything related to the memory has to be passed through network
+        * Stateless -> can scale up easily
+    * Shared nothing
+        * Easy to increase capacity
+        * Hard to ensure consistency
+        *  
+        * Each time you add a node, you shuffle the data.
+* Design issues
+    * How does application find data
+    * How to execute queries on distributed data
+    * Ensure correctness
+    * High level
+        * Homogenous nodes
+            * One node can do anything
+            * Shared nothing architecture
+        * Heterogenous nodes
+            * Different nodes diffrent tasks 
+            * Shared disk
+            *  
+            * You can scale up each of these 
+    * Data transparency 
+        * Don’t need to know the physical location of each data
+        * Data partitioning
+            * naive way
+                * 
+                * Join -> no use
+            * 
+* Partitioning schemes
+    * Sharding -> excites query fragments on each partition and combines the result. 
+    * Naive partitioning 
+        * Each table go to one partition 
+            * Easy to know which partition need to go.
+            * If you don’t need to read, put it in one.
+            * Problem -> not scalable 
+                * Hot spot
+                * Joins 
+        * Horizontal partitioning 
+            * Just partition one time
+            * Consistent hash
+            * 
+        * Logical partitioning
+            * Update will go to the single node
+        * Physical partitioning
+            * Really go to different disks
+* Single vs distributed -> make that all txn to one node. -> distributed txn is hard -> must need coordinate
+    * Single -> no coordinate
+    * Distributed -> requires coordination
+* Transaction coordination
+    * Centralized -> global cop
+        * TP monitors 
+            * Lock request -> ack
+            * Commit request -> 
+                * partitions -> safe?(constraint violation?)
+                * ack
+        * Middleware
+            * Query request -> know where it stores and locks state ( know where you should go to )  -> send to the partitions
+            * Commit request -> safe? -> ack
+    * Decentralized -> nodes organize themselves
+        * Pick a node -> responsible for the txns 
+            * Ack to where to go
+            * Commit -> communicating with other nodes. ( safe commit )
+        * Commit request -> safe to commit? 
+* Distributed concurrency control 
+    * Hard ->
+        * replication
+        * Network communication
+        * Node failures
+        * Clock knew
+    * Have to know their lock states.
+Lec 23
+* Problem
+    * A node fails 
+    * Show up late 
+    * Don’t wait for agree
+* Atomic Commit Protocols ( consens protocal )
+    * Two-phase commit
+        * Prepare 
+            * Commit to base (coordinator) 
+            * Sends to participant to know if it is involved
+            * Logging all the message of sending and ack.
+        *  
+        * Commit 
+            * Committed -> send back success
+        * Abort
+            * Sees abort -> abort the transaction. 
+        * Early prepare voting 
+            * Last query, it will piggyback the ack and result. Don’t need to .
+        * Early ack after prepare
+            * When gets ok, you send back success. ( do not need )
+                * Log all the message, if crash, you still know what to do.
+    * Coordinator crash -> abort
+    * Participant crash -> think as it sends abort 
+* Paxos -> majority 
+    * Minority figure out how to commit the transactions.
+    * 
+* Replication
+* Consistency Issues
+* Federated Databases
+
+
 Donald DB
 * Resource Model
     * Collection = Table
@@ -411,50 +822,36 @@ Lec 7
         * Some terms
             * Cluster , uncluster -> same order or not
             * Dense -> one index for one entry, Sparse -> one index for one block
+Let 8
+* Index 
+    * Lucent/solr
     * 
-HW3
-* Find_by_template -> return csvdatatable
-    * Use index 
-* Add_index:
-    * Unique one row one index 
-    * Index -> may have lot. 
-* Import(rows) 
-* Save() -> csv file 
-* Load() -> load -> disk -> memory  index
+    * Ingestion -> parse it and 
+    * https://www.geeksforgeeks.org/inverted-index/
+* DBMS vs OS
+    * Has to pin a page, and has a replacement policy
+    * File system -> 
+        * Block I/O 
+        * Bypass the operating system -> operate the block I/O
+* Keep track of pages, free space, records
+    * Heap file 
+    * 
+* Query processing
+    * Parser/translator -> tree
+    * Optimizer 
+    * Engine
+* Some common
+    * Push select 
+    * Push where
+    * Access path selection ->
+        *  -> choose the most selective index ( HW3 ) -> also apply in the join
+*  Also in the hw3
+* Statistics -> update -> you have the statistics of the  tables so that you can do the optimization based on that.
 
-Mid-term
-* 先明白他要做的事情
-* 根据代码和他的话把他要做的事情对着代码说出来，知道每行要干什么
-* 确定先后顺序，写之前有一个expectation，写完之后对照。
-* 能跟着写的就跟着写...
-* 2.
-    * Get the join table a+b ( joined by playerid, teamed).   
-    * According to the jointable get playerid, teamid 
-        * namelest, namefirst(sub query)
-        * Game_player_p, m
-        * First year, last year ( a condition)
-        * Total_g (add together)
-* 3.
-    * FROM ( one row = one person)
-        *  people from appearances (through peopled) 因为 peopled 对应一个people 
-        * And life span is not null （subquery) -> subquery = a table
-    * SELECT
-        * People info
-        * DOD, DOB (concat -> life_span)
-        * Life_span
-* 4.
-    * Sub query in select
-    * Use subquery + in to get the people in Hof but not a player or manager.
-* Join:
-    * = data1(A,B,C) (ON) (people) add batting info
-        * Table1 info: … 1 (lastname)
-        * Table2 info: …. n ( batting info)
-    * Data add (park name) (on) (park name)
-        * Table1 info: … parkname
-        * Table2 info: … parkrealname
-
-
-
+Recovering 
+* Know the logs
+    * Redo 
+    * undo 
 书
 Relational Model
 * Relational model
@@ -538,3 +935,6 @@ Relational Model
                 *         * 相当于把一个加上去
     * 
             * 
+
+问题：
+* Is order really does not matter?
